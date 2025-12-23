@@ -2,6 +2,8 @@ package com.hellFire.FoodOrderingSystemThinkify.controllers;
 
 
 import com.hellFire.FoodOrderingSystemThinkify.dtos.requests.AddAppUserRequest;
+import com.hellFire.FoodOrderingSystemThinkify.dtos.requests.AddWalletRequest;
+import com.hellFire.FoodOrderingSystemThinkify.exceptions.UserNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.services.AppUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,17 @@ public class AppUserController {
             return new ResponseEntity<>(appUserService.createAppUser(request), HttpStatus.CREATED);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("/{userId}/add-wallet")
+    public ResponseEntity<?> addWallet(@Valid @RequestBody AddWalletRequest request,
+                                       @PathVariable Long userId){
+        try {
+           return new ResponseEntity<>(appUserService.addWallet(userId, request), HttpStatus.CREATED);
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 

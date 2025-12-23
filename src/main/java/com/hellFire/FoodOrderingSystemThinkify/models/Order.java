@@ -2,6 +2,7 @@ package com.hellFire.FoodOrderingSystemThinkify.models;
 
 import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderFullFilledBy;
 import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderStatus;
+import com.hellFire.FoodOrderingSystemThinkify.models.enums.PaymentStatus;
 import lombok.Data;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public class Order {
     private List<OrderedItem> orderedItems;
     private OrderStatus status;
     private OrderFullFilledBy fullFilledBy;
+    private PaymentStatus paymentStatus;
+    private Double totalAmount;
 }

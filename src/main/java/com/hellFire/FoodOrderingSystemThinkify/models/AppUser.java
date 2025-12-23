@@ -6,4 +6,5 @@ import lombok.Data;
 public class AppUser {
     private Long id;
     private String name;
+    private Wallet wallet;
 }

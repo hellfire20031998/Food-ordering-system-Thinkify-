@@ -8,12 +8,12 @@ import com.hellFire.FoodOrderingSystemThinkify.exceptions.OrderNotFoundException
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.RestaurantNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.UserNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.models.*;
-import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderFullFilledBy;
-import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderItemStatus;
-import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderStatus;
+import com.hellFire.FoodOrderingSystemThinkify.models.enums.*;
 import com.hellFire.FoodOrderingSystemThinkify.respositories.IOrderRepository;
 import com.hellFire.FoodOrderingSystemThinkify.respositories.IOrderedItemRepository;
+import com.hellFire.FoodOrderingSystemThinkify.strategies.IPaymentStrategy;
 import com.hellFire.FoodOrderingSystemThinkify.strategies.IRestaurantSelectionStrategy;
+import com.hellFire.FoodOrderingSystemThinkify.strategies.factory.PaymentFactory;
 import com.hellFire.FoodOrderingSystemThinkify.strategies.factory.StrategyFactory;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +42,12 @@ public class OrderService {
 
     @Autowired
     private AppUserService userService;
+
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private PaymentFactory paymentFactory;
 
 
     public OrderDto placeOrder(OrderRequest request) throws UserNotFoundException {
@@ -133,6 +137,9 @@ public class OrderService {
         order.setFullFilledBy(OrderFullFilledBy.ONE_RESTAURANT);
         order.setOrderedItems(savedOrderedItems);
         order.setStatus(OrderStatus.ACCEPTED);
+        order.setPaymentStatus(PaymentStatus.UNPAID);
+        order.setTotalAmount(calculateTotalCost(orderedItems));
+        order.setTotalAmount(calculateTotalCost(savedOrderedItems));
         return toDto(orderRepository.save(order));
     }
 
@@ -199,6 +206,8 @@ public class OrderService {
         order.setStatus(OrderStatus.ACCEPTED);
         order.setFullFilledBy(OrderFullFilledBy.MANY_RESTAURANTS);
         order.setOrderedItems(savedItems);
+        order.setPaymentStatus(PaymentStatus.UNPAID);
+        order.setTotalAmount(calculateTotalCost(orderedItems));
         return toDto(orderRepository.save(order));
     }
 
@@ -261,6 +270,23 @@ public class OrderService {
         return toOrderedItemDto(orderedItem);
     }
 
+    public OrderDto updatePayment(Long userId, PaymentMethod method){
+        Order order = orderRepository.findById(userId);
+        if(Objects.isNull(order)){
+            throw new RuntimeException("Order not found with id " + userId);
+        }
+        AppUser user = order.getUser();
+        IPaymentStrategy paymentStrategy = paymentFactory.getPaymentStrategy(method);
+
+        boolean payment = paymentStrategy.pay(user, order.getTotalAmount());
+        if(payment){
+            order.setPaymentStatus(PaymentStatus.PAID);
+            return toDto(orderRepository.save(order));
+        }else{
+            throw new RuntimeException("Payment failed");
+        }
+    }
+
     private void checkFullOrderCompletion(Order order) {
 
         boolean fullCompleted = order.getOrderedItems().stream()
@@ -285,6 +311,13 @@ public class OrderService {
         }
     }
 
+    private Double calculateTotalCost(List<OrderedItem> items) {
+        return items.stream()
+                .mapToDouble(item -> item.getQuantity() * item.getMenu().getItemPrice().getPrice())
+                .sum();
+    }
+
+
 
     public OrderDto toDto(Order order) {
         OrderDto orderDto = new OrderDto();
@@ -293,6 +326,8 @@ public class OrderService {
         orderDto.setOrderedItems(toOrderedItemDtoList(order.getOrderedItems()));
         orderDto.setStatus(order.getStatus());
         orderDto.setFullFilledBy(order.getFullFilledBy());
+        orderDto.setPaymentStatus(order.getPaymentStatus());
+        orderDto.setTotalAmount(calculateTotalCost(order.getOrderedItems()));
         return orderDto;
     }
 

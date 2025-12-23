@@ -1,0 +1,380 @@
+{
+  "info": {
+    "_postman_id": "9ab44478-c4b8-481f-80c1-1dbf5773a2aa",
+    "name": "Thinkify",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Restaurant",
+      "item": [
+        {
+          "name": "OnBoardRestaurant",
+          "id": "832e4c31-5daa-4441-b01d-6e933c18fae6",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"R1\",\r\n  \"maxOrders\": 5,\r\n  \"rating\": 4.5,\r\n  \"menuRequests\": [\r\n    {\r\n      \"itemName\": \"Veg Biryani\",\r\n      \"itemPrice\": {\r\n        \"price\": 100,\r\n        \"currency\": \"INR\"\r\n      }\r\n    },\r\n    {\r\n      \"itemName\": \"Chicken Biryani\",\r\n      \"itemPrice\": {\r\n        \"price\": 150,\r\n        \"currency\": \"INR\"\r\n      }\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/restaurant/onboard",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "restaurant",
+                "onboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Restaurant",
+          "id": "62c49b1a-0a0b-401a-8222-bf36282b73d2",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"R2\",\r\n  \"maxOrders\": 5,\r\n  \"rating\": 4.5,\r\n  \"menuRequests\": [\r\n    {\r\n      \"menuName\": \"Veg Biryani\",\r\n      \"price\": 100\r\n    },\r\n    {\r\n      \"menuName\": \"Chicken Biryani\",\r\n      \"price\": 150\r\n    }\r\n  ]\r\n}\r\n"
+            },
+            "url": {
+              "raw": "http://localhost:8080/restaurant",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "restaurant"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update menu",
+          "id": "d26aab9a-03bf-4251-a857-894c36d78942",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 2,\r\n    \"itemName\": \"Veg Biryani 1\",\r\n    \"itemPrice\": {\r\n        \"price\": 150.0,\r\n        \"currency\": \"USD\"\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/restaurant/R1/menu",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "restaurant",
+                "R1",
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add menu",
+          "id": "3f2d488e-4805-4b8f-b2b4-c518f0ea3d38",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\r\n    {\r\n        \"itemName\": \"Non-Veg Biryani\",\r\n        \"itemPrice\": {\r\n            \"price\": 150.0,\r\n            \"currency\": \"INR\"\r\n        }\r\n    }\r\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/restaurant/R1/menu",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "restaurant",
+                "R1",
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "96c4be63-c2a4-4d7c-9be1-1e5c37211279"
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "create order",
+          "id": "a3e74b64-dd9a-486b-b8e5-db35137e8818",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": 7,\r\n  \"strategy\": \"LOWEST_COST\",\r\n  \"orderItems\": [\r\n    {\r\n      \"itemName\": \"Veg Biryani\",\r\n      \"quantity\": 3\r\n    },\r\n    {\r\n      \"itemName\": \"Veg Biryani\",\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/order/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "order",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all orders",
+          "id": "9859d26c-a172-488a-b124-1ebd0243ae56",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": 7,\r\n  \"strategy\": \"LOWEST_COST\",\r\n  \"orderItems\": [\r\n    {\r\n      \"itemName\": \"Idli\",\r\n      \"quantity\": 3\r\n    },\r\n    {\r\n      \"itemName\": \"Dosa\",\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/order/get-all",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "order",
+                "get-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update status",
+          "id": "8f98d301-058a-4150-9931-a1ecb2e18402",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": 7,\r\n  \"strategy\": \"LOWEST_COST\",\r\n  \"orderItems\": [\r\n    {\r\n      \"itemName\": \"Idli\",\r\n      \"quantity\": 3\r\n    },\r\n    {\r\n      \"itemName\": \"Dosa\",\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/order/16/complete",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "order",
+                "16",
+                "complete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/restaurant/{restaurantId}/order/{orderId}/complete/{itemId}",
+          "id": "a0f59ff3-3086-4aad-ad38-998fcbef063b",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": 7,\r\n  \"strategy\": \"LOWEST_COST\",\r\n  \"orderItems\": [\r\n    {\r\n      \"itemName\": \"Idli\",\r\n      \"quantity\": 3\r\n    },\r\n    {\r\n      \"itemName\": \"Dosa\",\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/order/restaurant/{restaurantId}/order/{orderId}/complete/{itemId}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "order",
+                "restaurant",
+                "{restaurantId}",
+                "order",
+                "{orderId}",
+                "complete",
+                "{itemId}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/{orderId}/payment-method/{method}",
+          "id": "75f56c5e-36b9-4610-9f35-3218727a72d6",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/order/{orderId}/payment-method/{method}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "order",
+                "{orderId}",
+                "payment-method",
+                "{method}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "56cdf609-30d3-4200-97fc-f466ca498ad5"
+    },
+    {
+      "name": "App User",
+      "item": [
+        {
+          "name": "create user",
+          "id": "f37bcfa6-7e02-4c95-bf4c-3bae82d0bdd7",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Abhishek\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/user/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-all",
+          "id": "61ff9634-c7f1-4d80-9902-e4bf170c8df0",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/get-all",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "get-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/{userId}/add-wallet",
+          "id": "24d879a3-541c-4b56-943c-d1b1a93feaea",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"itemPrice\":{\r\n        \"price\":500,\r\n        \"currency\":\"INR\"\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/user/4/add-wallet",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "4",
+                "add-wallet"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "ed4a47be-9f12-45c0-8738-2c080e3871dc"
+    }
+  ]
+}
