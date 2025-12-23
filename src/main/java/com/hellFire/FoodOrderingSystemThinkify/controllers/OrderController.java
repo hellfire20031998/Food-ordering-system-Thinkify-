@@ -36,15 +36,6 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/{id}/complete")
-    public ResponseEntity<?> markOrderComplete(@PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(orderService.completeOrder(id), HttpStatus.OK);
-        } catch (OrderNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @PutMapping("/restaurant/{restaurantId}/order/{orderId}/complete/{itemId}")
     public ResponseEntity<?> markOrderItemComplete(@PathVariable Long orderId,
                                                    @PathVariable Long itemId,

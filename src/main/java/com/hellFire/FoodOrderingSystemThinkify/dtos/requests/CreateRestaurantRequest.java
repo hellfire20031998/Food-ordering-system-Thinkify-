@@ -18,6 +18,5 @@ public class CreateRestaurantRequest {
     @DecimalMin(value = "1.0", message = "Min rating must be 1")
     private double rating;
 
-    @NotEmpty(message = "menu items can not be empty")
     private List<@Valid CreateMenuRequest> menuRequests;
 }
