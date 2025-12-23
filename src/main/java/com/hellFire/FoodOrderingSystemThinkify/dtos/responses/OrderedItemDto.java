@@ -9,4 +9,5 @@ public class OrderedItemDto {
     private MenuDto menu;
     private int quantity;
     private OrderItemStatus orderItemStatus;
+    private RestaurantDto restaurant;
 }

@@ -64,7 +64,7 @@ public class RestaurantService {
     }
 
     public List<RestaurantDto> getAllRestaurants() {
-        return restaurantRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return toDtoList(restaurantRepository.findAll());
     }
 
     public Restaurant getById(Long id) throws RestaurantNotFoundException {
@@ -80,6 +80,8 @@ public class RestaurantService {
         response.setId(restaurant.getId());
         response.setName(restaurant.getName());
         response.setRating(restaurant.getRating());
+        response.setMaxOrders(restaurant.getMaxOrders());
+        response.setCurrentOrders(restaurant.getCurrentOrders());
         response.setMenuItems(menuService.toDtoList(menuService.getMenuListByRestaurantId(restaurant.getId())));
         return response;
     }

@@ -10,4 +10,6 @@ public class RestaurantDto {
     private String name;
     private List<MenuDto> menuItems;
     private double rating;
+    private int maxOrders;
+    private int currentOrders;
 }

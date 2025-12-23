@@ -15,6 +15,7 @@ import com.hellFire.FoodOrderingSystemThinkify.respositories.IOrderRepository;
 import com.hellFire.FoodOrderingSystemThinkify.respositories.IOrderedItemRepository;
 import com.hellFire.FoodOrderingSystemThinkify.strategies.IRestaurantSelectionStrategy;
 import com.hellFire.FoodOrderingSystemThinkify.strategies.factory.StrategyFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static com.hellFire.FoodOrderingSystemThinkify.utils.Utils.normalize;
 
+@Log4j2
 @Service
 public class OrderService {
 
@@ -290,6 +292,7 @@ public class OrderService {
         orderDto.setUser(userService.toDto(order.getUser()));
         orderDto.setOrderedItems(toOrderedItemDtoList(order.getOrderedItems()));
         orderDto.setStatus(order.getStatus());
+        orderDto.setFullFilledBy(order.getFullFilledBy());
         return orderDto;
     }
 
@@ -300,8 +303,10 @@ public class OrderService {
     public OrderedItemDto toOrderedItemDto(OrderedItem orderedItem) {
         OrderedItemDto orderedItemDto = new OrderedItemDto();
         orderedItemDto.setId(orderedItem.getId());
+        orderedItemDto.setRestaurant(restaurantService.toDto(orderedItem.getMenu().getRestaurant()));
         orderedItemDto.setMenu(menuService.toDto(orderedItem.getMenu()));
         orderedItemDto.setQuantity(orderedItem.getQuantity());
+        orderedItemDto.setOrderItemStatus(orderedItem.getOrderItemStatus());
         return orderedItemDto;
     }
 

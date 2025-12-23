@@ -45,12 +45,12 @@ public class OrderController {
         }
     }
 
-    @PutMapping("{restaurantId}/restaurant/{id}/order/{itemId}/complete")
-    public ResponseEntity<?> markOrderItemComplete(@PathVariable Long id,
+    @PutMapping("/restaurant/{restaurantId}/order/{orderId}/complete/{itemId}")
+    public ResponseEntity<?> markOrderItemComplete(@PathVariable Long orderId,
                                                    @PathVariable Long itemId,
                                                    @PathVariable Long restaurantId) {
         try {
-            return new ResponseEntity<>(orderService.completeOrderItem(id, itemId, restaurantId), HttpStatus.OK);
+            return new ResponseEntity<>(orderService.completeOrderItem(orderId, itemId, restaurantId), HttpStatus.OK);
         } catch (OrderNotFoundException | RestaurantNotFoundException e) {
             throw new RuntimeException(e);
         }
