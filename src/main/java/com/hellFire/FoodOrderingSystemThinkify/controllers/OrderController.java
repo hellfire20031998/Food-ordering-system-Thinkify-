@@ -4,6 +4,7 @@ import com.hellFire.FoodOrderingSystemThinkify.dtos.requests.OrderRequest;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.OrderNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.RestaurantNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.UserNotFoundException;
+import com.hellFire.FoodOrderingSystemThinkify.models.enums.PaymentMethod;
 import com.hellFire.FoodOrderingSystemThinkify.services.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,16 @@ public class OrderController {
         try {
             return new ResponseEntity<>(orderService.completeOrderItem(orderId, itemId, restaurantId), HttpStatus.OK);
         } catch (OrderNotFoundException | RestaurantNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("/{orderId}/payment-method/{method}")
+    public ResponseEntity<?> updateOrderPayment(@PathVariable Long orderId,
+                                                @PathVariable PaymentMethod method){
+        try{
+           return new ResponseEntity<>(orderService.updatePayment(orderId, method), HttpStatus.OK);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

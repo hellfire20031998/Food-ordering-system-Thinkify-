@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class AppUserDto {
     private Long id;
     private String name;
+    private WalletDto wallet;
 }
