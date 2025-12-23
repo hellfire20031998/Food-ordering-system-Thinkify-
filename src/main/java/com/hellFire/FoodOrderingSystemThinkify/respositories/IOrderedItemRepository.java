@@ -9,4 +9,5 @@ public interface IOrderedItemRepository {
     OrderedItem save(OrderedItem item);
     List<OrderedItem> findAll();
     List<OrderedItem> saveAll(List<OrderedItem> orderedItems);
+    OrderedItem findById(Long id);
 }

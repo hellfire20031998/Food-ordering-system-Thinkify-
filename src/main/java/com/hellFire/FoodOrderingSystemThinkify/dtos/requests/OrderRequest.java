@@ -1,5 +1,6 @@
 package com.hellFire.FoodOrderingSystemThinkify.dtos.requests;
 
+import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderFullFilledBy;
 import com.hellFire.FoodOrderingSystemThinkify.models.enums.RestaurantSelection;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,4 +17,5 @@ public class OrderRequest {
     private List<@Valid OrderItemRequest> orderItems;
 
     private RestaurantSelection strategy;
+    private OrderFullFilledBy orderFullFilledBy;
 }

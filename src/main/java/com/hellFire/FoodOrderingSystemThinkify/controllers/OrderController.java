@@ -2,6 +2,7 @@ package com.hellFire.FoodOrderingSystemThinkify.controllers;
 
 import com.hellFire.FoodOrderingSystemThinkify.dtos.requests.OrderRequest;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.OrderNotFoundException;
+import com.hellFire.FoodOrderingSystemThinkify.exceptions.RestaurantNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.UserNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.services.OrderService;
 import jakarta.validation.Valid;
@@ -36,10 +37,21 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/complete")
-    public ResponseEntity<?> complete(@PathVariable Long id) {
+    public ResponseEntity<?> markOrderComplete(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(orderService.completeOrder(id), HttpStatus.OK);
         } catch (OrderNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("{restaurantId}/restaurant/{id}/order/{itemId}/complete")
+    public ResponseEntity<?> markOrderItemComplete(@PathVariable Long id,
+                                                   @PathVariable Long itemId,
+                                                   @PathVariable Long restaurantId) {
+        try {
+            return new ResponseEntity<>(orderService.completeOrderItem(id, itemId, restaurantId), HttpStatus.OK);
+        } catch (OrderNotFoundException | RestaurantNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

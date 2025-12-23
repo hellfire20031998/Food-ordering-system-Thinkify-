@@ -18,7 +18,9 @@ public class OrderRepositoryImpl implements IOrderRepository {
 
     @Override
     public Order save(Order order) {
-        order.setId(getNextId());
+        if (order.getId() == null) {
+            order.setId(getNextId());
+        }
         orders.put(order.getId(), order);
         return order;
     }

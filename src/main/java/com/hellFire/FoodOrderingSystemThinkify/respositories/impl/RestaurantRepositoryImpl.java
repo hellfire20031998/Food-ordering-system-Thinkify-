@@ -17,7 +17,9 @@ public class RestaurantRepositoryImpl implements IRestaurantRepository {
 
     @Override
     public Restaurant save(Restaurant restaurant) {
-        restaurant.setId(getNextId());
+        if (restaurant.getId() == null) {
+            restaurant.setId(getNextId());
+        }
         restaurants.put(restaurant.getId(), restaurant);
         return restaurant;
     }

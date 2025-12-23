@@ -18,7 +18,9 @@ public class OrderedItemRepositoryImpl implements IOrderedItemRepository {
 
     @Override
     public OrderedItem save(OrderedItem item) {
-        item.setId(getNextId());
+        if (item.getId() == null) {
+            item.setId(getNextId());
+        }
         orderedItems.put(item.getId(), item);
         return item;
     }
@@ -31,5 +33,10 @@ public class OrderedItemRepositoryImpl implements IOrderedItemRepository {
     @Override
     public List<OrderedItem> saveAll(List<OrderedItem> orderedItems) {
         return orderedItems.stream().map(this::save).collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderedItem findById(Long id) {
+        return orderedItems.getOrDefault(id, null);
     }
 }

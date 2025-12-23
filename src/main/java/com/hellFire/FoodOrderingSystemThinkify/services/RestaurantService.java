@@ -45,26 +45,34 @@ public class RestaurantService {
         }
     }
 
-    public String updateMenu(String restaurantName, UpdateMenuRequest request) throws RestaurantNotFoundException, MenuItemNotFoundException {
-        Restaurant r = restaurantRepository.findByName(restaurantName);
+    public String updateMenu(Long id, UpdateMenuRequest request) throws RestaurantNotFoundException, MenuItemNotFoundException {
+        Restaurant r = restaurantRepository.findById(id);
         if(r != null) {
             return menuService.updateMenuById(r.getId(), request);
         }else {
-            throw new RestaurantNotFoundException("Restaurant with id " + restaurantName + " does not exist");
+            throw new RestaurantNotFoundException("Restaurant with id " + id + " does not exist");
         }
     }
 
-    public List<MenuDto> addMenu(String restaurantName, List<CreateMenuRequest> request) throws RestaurantNotFoundException, MenuItemNotFoundException, MenuItemAlreadyExistException {
-        Restaurant r = restaurantRepository.findByName(restaurantName);
+    public List<MenuDto> addMenu(Long id, List<CreateMenuRequest> request) throws RestaurantNotFoundException, MenuItemNotFoundException, MenuItemAlreadyExistException {
+        Restaurant r = restaurantRepository.findById(id);
         if(r != null) {
             return menuService.toDtoList(menuService.createMenuList(request, r));
         }else {
-            throw new RestaurantNotFoundException("Restaurant with id " + restaurantName + " does not exist");
+            throw new RestaurantNotFoundException("Restaurant with id " + id + " does not exist");
         }
     }
 
     public List<RestaurantDto> getAllRestaurants() {
         return restaurantRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public Restaurant getById(Long id) throws RestaurantNotFoundException {
+        Restaurant r = restaurantRepository.findById(id);
+        if(r == null) {
+            throw new RestaurantNotFoundException("Restaurant with id " + id + " does not exist");
+        }
+        return r;
     }
 
     public RestaurantDto toDto(Restaurant restaurant) {

@@ -24,7 +24,9 @@ public class MenuRepositoryImpl implements IMenuRepository {
 
     @Override
     public Menu save(Menu menu) {
-        menu.setId(getNextId());
+        if (menu.getId() == null) {
+            menu.setId(getNextId());
+        }
         menus.put(menu.getId(), menu);
         return menu;
     }

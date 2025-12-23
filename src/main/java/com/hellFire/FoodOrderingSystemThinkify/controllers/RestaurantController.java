@@ -40,12 +40,12 @@ public class RestaurantController {
         }
     }
 
-    @PutMapping("/{restaurantName}/menu")
+    @PutMapping("/{id}/menu")
     public ResponseEntity<?> updateMenu(
-            @PathVariable String restaurantName,
+            @PathVariable Long id,
             @RequestBody UpdateMenuRequest request) {
         try {
-            return new ResponseEntity<>( restaurantService.updateMenu(restaurantName, request), HttpStatus.OK);
+            return new ResponseEntity<>( restaurantService.updateMenu(id, request), HttpStatus.OK);
         } catch (RestaurantNotFoundException | MenuItemNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         } catch (Exception e) {
@@ -53,12 +53,12 @@ public class RestaurantController {
         }
     }
 
-    @PostMapping("/{restaurantName}/menu")
+    @PostMapping("/{id}/menu")
     public ResponseEntity<?> addMenu(
-            @PathVariable String restaurantName,
+            @PathVariable Long id,
             @RequestBody @Valid List<CreateMenuRequest> request) {
         try {
-            return new ResponseEntity<>( restaurantService.addMenu(restaurantName, request), HttpStatus.OK);
+            return new ResponseEntity<>( restaurantService.addMenu(id, request), HttpStatus.OK);
         } catch (RestaurantNotFoundException | MenuItemNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         } catch (Exception e) {

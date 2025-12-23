@@ -5,8 +5,11 @@ import com.hellFire.FoodOrderingSystemThinkify.dtos.requests.OrderRequest;
 import com.hellFire.FoodOrderingSystemThinkify.dtos.responses.OrderDto;
 import com.hellFire.FoodOrderingSystemThinkify.dtos.responses.OrderedItemDto;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.OrderNotFoundException;
+import com.hellFire.FoodOrderingSystemThinkify.exceptions.RestaurantNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.exceptions.UserNotFoundException;
 import com.hellFire.FoodOrderingSystemThinkify.models.*;
+import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderFullFilledBy;
+import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderItemStatus;
 import com.hellFire.FoodOrderingSystemThinkify.models.enums.OrderStatus;
 import com.hellFire.FoodOrderingSystemThinkify.respositories.IOrderRepository;
 import com.hellFire.FoodOrderingSystemThinkify.respositories.IOrderedItemRepository;
@@ -37,13 +40,16 @@ public class OrderService {
 
     @Autowired
     private AppUserService userService;
+    @Autowired
+    private RestaurantService restaurantService;
 
 
     public OrderDto placeOrder(OrderRequest request) throws UserNotFoundException {
 
         AppUser appUser = userService.getAppUserById(request.getUserId());
-        Order order = new Order();
-        order.setUser(appUser);
+        if(Objects.isNull(request.getOrderFullFilledBy())){
+            request.setOrderFullFilledBy(OrderFullFilledBy.ONE_RESTAURANT);
+        }
 
         List<Menu> allMenus = new ArrayList<>();
         for (OrderItemRequest itemReq : request.getOrderItems()) {
@@ -52,6 +58,10 @@ public class OrderService {
 
         Map<Restaurant, List<Menu>> restaurantMenuMap =
                 allMenus.stream().collect(Collectors.groupingBy(Menu::getRestaurant));
+
+        if(OrderFullFilledBy.MANY_RESTAURANTS.equals(request.getOrderFullFilledBy())){
+            return fulfillOrderByManyRestaurants(request, restaurantMenuMap);
+        }
 
         Map<Restaurant, List<Menu>> eligibleRestaurantMap = new HashMap<>();
 
@@ -111,34 +121,168 @@ public class OrderService {
             OrderedItem oi = new OrderedItem();
             oi.setMenu(matchedMenu);
             oi.setQuantity(reqItem.getQuantity());
-
+            oi.setOrderItemStatus(OrderItemStatus.ACCEPTED);
             orderedItems.add(oi);
         }
 
         List<OrderedItem> savedOrderedItems = orderedItemRepository.saveAll(orderedItems);
-
+        Order order = new Order();
+        order.setUser(appUser);
+        order.setFullFilledBy(OrderFullFilledBy.ONE_RESTAURANT);
         order.setOrderedItems(savedOrderedItems);
         order.setStatus(OrderStatus.ACCEPTED);
-
         return toDto(orderRepository.save(order));
     }
 
+    public OrderDto fulfillOrderByManyRestaurants(
+            OrderRequest request,
+            Map<Restaurant, List<Menu>> restaurantMenuListMap
+    ) throws UserNotFoundException {
+
+        AppUser user = userService.getAppUserById(request.getUserId());
+
+        IRestaurantSelectionStrategy strategy = factory.getStrategy(request.getStrategy());
+
+        List<OrderedItem> orderedItems = new ArrayList<>();
+
+        Set<Restaurant> usedRestaurants = new HashSet<>();
+
+        for (OrderItemRequest itemReq : request.getOrderItems()) {
+
+            List<Menu> menusForItem =
+                    restaurantMenuListMap.values().stream()
+                            .flatMap(List::stream)
+                            .filter(menu ->
+                                    normalize(menu.getItemName()).equals(
+                                            normalize(itemReq.getItemName())
+                                    )
+                            )
+                            .toList();
+
+            if (menusForItem.isEmpty()) {
+                throw new RuntimeException("Item not available anywhere: " + itemReq.getItemName());
+            }
+            Map<Restaurant, List<Menu>> seletedRestaurantMap = menusForItem.stream().collect(Collectors.groupingBy(Menu::getRestaurant));
+            Restaurant selectedRestaurant = strategy.selectRestaurant(seletedRestaurantMap, List.of(itemReq));
+
+            if(Objects.isNull(selectedRestaurant)){
+                throw new RuntimeException("No restaurant available for item: " + itemReq.getItemName());
+            }
+
+            Menu selectedMenu = seletedRestaurantMap.get(selectedRestaurant).stream()
+                    .filter(Objects::nonNull)
+                    .filter(menu -> normalize(menu.getItemName()).equals(normalize(itemReq.getItemName())))
+                    .findFirst().orElse(null);
+
+            if (selectedMenu == null) {
+                throw new RuntimeException("No restaurant available for item: " + itemReq.getItemName());
+            }
+
+            if (!usedRestaurants.contains(selectedRestaurant)) {
+                selectedRestaurant.acceptOrder();
+                usedRestaurants.add(selectedRestaurant);
+            }
+
+            OrderedItem oi = new OrderedItem();
+            oi.setMenu(selectedMenu);
+            oi.setOrderItemStatus(OrderItemStatus.ACCEPTED);
+            oi.setQuantity(itemReq.getQuantity());
+
+            orderedItems.add(oi);
+        }
+
+        List<OrderedItem> savedItems = orderedItemRepository.saveAll(orderedItems);
+        Order order = new Order();
+        order.setUser(user);
+        order.setStatus(OrderStatus.ACCEPTED);
+        order.setFullFilledBy(OrderFullFilledBy.MANY_RESTAURANTS);
+        order.setOrderedItems(savedItems);
+        return toDto(orderRepository.save(order));
+    }
 
     public List<OrderDto> getAllOrders() {
         return toDtoList(orderRepository.findAll());
     }
 
+    @Deprecated
     public OrderDto completeOrder(Long orderId) throws OrderNotFoundException {
         Order order = orderRepository.findById(orderId);
         if(Objects.isNull(order)){
             throw new OrderNotFoundException("Order not found with id " + orderId);
         }
+        if(OrderFullFilledBy.MANY_RESTAURANTS.equals(order.getFullFilledBy())){
+            for(OrderedItem oi : order.getOrderedItems()){
+                if(!OrderItemStatus.COMPLETED.equals(oi.getOrderItemStatus())){
+                    throw new RuntimeException("All order items are not completed yet");
+                }
+            }
+        }
+        boolean allOrderItemCompleted = true;
         for (OrderedItem orderedItem : order.getOrderedItems()) {
-            orderedItem.getMenu().getRestaurant().completeOrder();
+            if (!OrderItemStatus.COMPLETED.equals(orderedItem.getOrderItemStatus())) {
+                allOrderItemCompleted = false;
+                break;
+            }
+        }
+        if(allOrderItemCompleted){
+            order.getOrderedItems().get(0).getMenu().getRestaurant().completeOrder();
         }
         order.setStatus(OrderStatus.COMPLETED);
         return toDto(order);
     }
+
+    public OrderedItemDto completeOrderItem(Long orderId, Long orderItemId, Long restaurantId)
+            throws OrderNotFoundException, RestaurantNotFoundException {
+
+        Order order = orderRepository.findById(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException("Order not found with id " + orderId);
+        }
+
+        Restaurant restaurant = restaurantService.getById(restaurantId);
+
+        OrderedItem orderedItem = order.getOrderedItems().stream()
+                .filter(oi -> oi.getId().equals(orderItemId))
+                .findFirst()
+                .orElseThrow(() -> new OrderNotFoundException("Order item not found with id " + orderItemId));
+
+        if (!orderedItem.getMenu().getRestaurant().getId().equals(restaurantId)) {
+            throw new RuntimeException("Restaurant not allowed to complete this item");
+        }
+
+        orderedItem.setOrderItemStatus(OrderItemStatus.COMPLETED);
+        orderedItemRepository.save(orderedItem);
+
+        checkRestaurantCompletion(order, restaurant);
+        checkFullOrderCompletion(order);
+
+        return toOrderedItemDto(orderedItem);
+    }
+
+    private void checkFullOrderCompletion(Order order) {
+
+        boolean fullCompleted = order.getOrderedItems().stream()
+                .allMatch(oi -> oi.getOrderItemStatus() == OrderItemStatus.COMPLETED);
+
+        if (fullCompleted) {
+            order.setStatus(OrderStatus.COMPLETED);
+        }
+    }
+
+    private void checkRestaurantCompletion(Order order, Restaurant restaurant) {
+
+        List<OrderedItem> itemsOfRestaurant = order.getOrderedItems().stream()
+                .filter(oi -> oi.getMenu().getRestaurant().equals(restaurant))
+                .toList();
+
+        boolean allCompleted = itemsOfRestaurant.stream()
+                .allMatch(oi -> oi.getOrderItemStatus() == OrderItemStatus.COMPLETED);
+
+        if (allCompleted) {
+            restaurant.completeOrder();
+        }
+    }
+
 
     public OrderDto toDto(Order order) {
         OrderDto orderDto = new OrderDto();

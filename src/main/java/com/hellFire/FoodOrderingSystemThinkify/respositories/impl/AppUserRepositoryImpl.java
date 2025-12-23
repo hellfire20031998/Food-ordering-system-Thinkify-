@@ -28,7 +28,9 @@ public class AppUserRepositoryImpl implements IAppUserRepository {
 
     @Override
     public AppUser save(AppUser appUser) {
-        appUser.setId(getNextId());
+        if(appUser.getId() == null) {
+            appUser.setId(getNextId());
+        }
         users.put(appUser.getId(), appUser);
         return appUser;
     }
